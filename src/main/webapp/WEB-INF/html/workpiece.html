@@ -1,0 +1,352 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>工件管理</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">切换导航</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">MES</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="/">产品介绍</a>
+                        </li>
+                        <li>
+                            <a href="#">作业车间调度系统</a>
+                        </li>
+                        <li>
+                            <a href="workstation">车间模型管理</a>
+                        </li>
+                        <li>
+                            <a href="machine">机器管理</a>
+                        </li>
+                        <li class="active">
+                            <a href="workpiece">工件管理</a>
+                        </li>
+                        <li>
+                            <a href="process">工序管理</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="login">登录</a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">开发人员<strong class="caret"></strong></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#">刘涛</a>
+                                </li>
+                                <li>
+                                    <a href="#">刘昊</a>
+                                </li>
+                                <li>
+                                    <a href="#">李沐辰</a>
+                                </li>
+                                <li>
+                                    <a href="#">赖弘</a>
+                                </li>
+                                <li>
+                                    <a href="#">夏晖阳</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+            </nav>
+            <h3>
+                工件管理子系统
+            </h3>
+
+            <ul class="pagination" id="pagination">
+                <li>
+                    <a href="javascript:void(0)" onclick="lastPage()">上一页</a>
+                </li>
+                <li class="active">
+                    <a href="javascript:void(0)" onclick="turnPage(1)">1</a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="nextPage()">下一页</a>
+                </li>
+            </ul>
+            <table class="table table-bordered table-hover" id="table">
+                <thead>
+                <tr>
+                    <th>
+                        编号
+                    </th>
+                    <th>
+                        名称
+                    </th>
+                    <th>
+                        工序数
+                    </th>
+                    <th>
+                        最快加工时长
+                    </th>
+                    <th>
+                        操作
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+            <a href="#modal-container-981597" onclick="changeItem(0)" role="button" class="btn btn-default"
+               data-toggle="modal">新增</a>
+
+            <div class="modal fade" id="modal-container-981597" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                编辑
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <form role="form">
+                                <div class="form-group">
+                                    <label for="inputId">ID</label>
+                                    <input type="number" class="form-control" id="inputId" disabled="disabled"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputName">名称</label>
+                                    <input type="text" class="form-control" id="inputName"/>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveOrUpdate()">保存</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="../../js/GetUrlVars.js"></script>
+<script type="text/javascript" src="../../js/BootstrapUtil.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    var id = 0;
+    var user;
+
+    var page = 1;
+    var maxPage = 0;
+    var from = 0;
+    var length = 10;
+
+    function changeItem(newId) {
+        id = newId;
+        $("#inputId").val(id);
+    }
+
+    function saveOrUpdate() {
+        $.ajax({
+            type:"POST",
+            contentType:"application/json",
+            url:"api/workpieceSaveOrUpdate?uid=" + user
+                + "&id=" + $("#inputId").val()
+                + "&name=" + $("#inputName").val(),
+            dataType:'json',
+            success : function(result) {
+                var res = eval("(" + result + ")");
+                commonUtil.message(res.data);
+                init();
+            }
+        });
+    }
+
+    function deleteItem(id) {
+        $.ajax({
+            type:"POST",
+            contentType:"application/json",
+            url:"api/workpieceDelete?id=" + id,
+            dataType:'json',
+            success : function(result) {
+                var res = eval("(" + result + ")");
+                commonUtil.message(res.data);
+                init();
+            }
+        });
+    }
+
+    function turnPage(newPage) {
+        page = newPage;
+        from = (page - 1) * length;
+        refresh();
+        changePageList();
+    }
+
+    function lastPage() {
+        if(page > 1) turnPage(page - 1);
+        else commonUtil.message("已到达首页", "warning");
+    }
+
+    function nextPage() {
+        if(page < maxPage) turnPage(page + 1);
+        else commonUtil.message("已到达尾页", "warning");
+    }
+
+    function changePageList() {
+        var active = "class=\"active\"";
+        $("#pagination").empty("");
+        $("#pagination").append("<li><a href=\"javascript:void(0)\" onclick=\"lastPage()\">上一页</a></li>");
+        if (maxPage < 7) {
+            for (let i = 0; i < maxPage; i++) {
+                if(i + 1 == page) active = "class=\"active\"";
+                else active = "";
+                $("#pagination").append("\n" +
+                    "                <li " + active + ">\n" +
+                    "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(" + (i + 1) + ")\">" + (i + 1) + "</a>\n" +
+                    "                </li>")
+            }
+        } else {
+
+            if (page > 4 && page < maxPage - 3) {
+                $("#pagination").append("\n" +
+                    "                <li>\n" +
+                    "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(1)\">1</a>\n" +
+                    "                </li>")
+                $("#pagination").append("<li><a>…</a></li>");
+                for (let i = page - 2; i < page + 1; i++) {
+                    if(i + 1 == page) active = "class=\"active\"";
+                    else active = "";
+                    $("#pagination").append("\n" +
+                        "                <li " + active + ">\n" +
+                        "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(" + (i + 1) + ")\">" + (i + 1) + "</a>\n" +
+                        "                </li>")
+                }
+                $("#pagination").append("<li><a>…</a></li>");
+                $("#pagination").append("\n" +
+                    "                <li>\n" +
+                    "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(" + maxPage + ")\">" + maxPage + "</a>\n" +
+                    "                </li>")
+            }
+            else if(page <= 4) {
+                for (let i = 0; i < 5; i++) {
+                    if(i + 1 == page) active = "class=\"active\"";
+                    else active = "";
+                    $("#pagination").append("\n" +
+                        "                <li " + active + ">\n" +
+                        "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(" + (i + 1) + ")\">" + (i + 1) + "</a>\n" +
+                        "                </li>")
+                }
+                $("#pagination").append("<li><a>…</a></li>");
+                $("#pagination").append("\n" +
+                    "                <li>\n" +
+                    "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(" + maxPage + ")\">" + maxPage + "</a>\n" +
+                    "                </li>")
+            }
+            else if(page >= maxPage - 3) {
+                $("#pagination").append("\n" +
+                    "                <li>\n" +
+                    "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(1)\">1</a>\n" +
+                    "                </li>")
+                $("#pagination").append("<li><a>…</a></li>");
+                for (let i = maxPage - 5; i < maxPage; i++) {
+                    if(i + 1 == page) active = "class=\"active\"";
+                    else active = "";
+                    $("#pagination").append("\n" +
+                        "                <li " + active + ">\n" +
+                        "                    <a href=\"javascript:void(0)\" onclick=\"turnPage(" + (i + 1) + ")\">" + (i + 1) + "</a>\n" +
+                        "                </li>")
+                }
+            }
+
+        }
+        $("#pagination").append("<li><a href=\"javascript:void(0)\" onclick=\"nextPage()\">下一页</a></li>");
+    }
+
+    function refresh() {
+        $("#table tr:not(:first)").empty("");
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "api/workpiece/get?from=" + from + "&length=" + length + "&uid=" + user,
+            dataType: 'json',
+            success: function (result) {
+                var pieceList = result;
+                console.log(pieceList);
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json",
+                    url: "plugin/tableLineWorkpiece",
+                    dataType: "text",
+                    success: function (result) {
+                        var plugin = result;
+                        for (var pieceListKey in pieceList) {
+                            var plugin_add = plugin.replace("id替换标记", pieceList[pieceListKey].id);
+                            plugin_add = plugin_add.replace("id替换标记", pieceList[pieceListKey].id);
+                            plugin_add = plugin_add.replace("id替换标记", pieceList[pieceListKey].id);
+                            plugin_add = plugin_add.replace("id替换标记", pieceList[pieceListKey].id);
+                            plugin_add = plugin_add.replace("名称替换标记", pieceList[pieceListKey].name);
+                            plugin_add = plugin_add.replace("工序数替换标记", pieceList[pieceListKey].processList.length);
+                            var fastTime = 0;
+                            var processList = pieceList[pieceListKey].processList;
+                            for (var processListKey in processList) {
+                                fastTime += processList[processListKey].time;
+                            }
+                            plugin_add = plugin_add.replace("最快加工时长替换标记", fastTime);
+                            if(pieceListKey % 2 == 0) {
+                                plugin_add = plugin_add.replace("类替换标记", "success");
+                            } else {
+                                plugin_add = plugin_add.replace("类替换标记", "info");
+                            }
+                            $("#table").append(plugin_add);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function init() {
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "api/workpiece/getNum?uid=" + user,
+            dataType: 'json',
+            success: function (result) {
+                var res = eval("(" + result + ")");
+                maxPage = Math.ceil(res.data / 10);
+                console.log(maxPage);
+                turnPage(page);
+            }
+        });
+    }
+
+    $(function() {
+        if ($.cookie("uid") != null) {
+            user = $.cookie("uid");
+        }
+        init();
+    });
+</script>
+</body>
+</html>

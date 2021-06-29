@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>用户统一登录</title>
+	<link rel="stylesheet" type="text/css" href="../../css/default.css">
+	<style type="text/css">
+		#login {
+			text-align: center;
+			width: 460px;
+			margin: 0 auto;
+			position: relative;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="login">
+		<form action="/api/login" method="post">
+			<div id="title">
+				<a>登录</a>
+			</div>
+			<input name="user" type="text" placeholder="邮箱/UID" oninput="userOninput()">
+			<input name="pass" type="password" placeholder="密码">
+			<div class="code-div">
+				<input name="code" type="text" placeholder="验证码" id="code-input">
+				<img name="code-img" src="/api/code-img" id="code-img" onClick="resetCode()" alt="验证码加载失败">
+			</div>
+			<input class="btn" type="button" value="登录" id="submit" name="submit" onClick="login()" disabled="disabled">
+			<input class="checkbox" type="checkbox" 	name="useCookies" checked="checked" value="111"/>十天内免登录
+			<a id="register" href="/register">没有账号?去注册--&gt;</a><br>
+			<a id="hint">&nbsp;</a>
+		</form>
+	</div>
+	
+</body>
+<script type="text/javascript" src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="../../js/GetUrlVars.js"></script>
+<script type="text/javascript">
+	
+	var fromUri = "";
+	
+	function resetCode() {
+		$("#code-img").attr("src", "/api/code-img?"+Math.random());
+	}
+
+	function userOninput() {
+		var useUid = false;
+		var useEmail = false;
+		
+		var user = $("input[name='user']").val();
+		
+		var num = /^[0-9]*$/;
+		var email = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+		
+		if(email.test(user)) {
+			useEmail = true;
+
+		} else if(num.test(user)) {
+			useUid = true;
+
+			if(user == "") {
+				useUid = false;
+				useEmail = false;
+			}
+		}
+		if(useUid||useEmail) {
+			$("#hint").text('');
+			$("input[name='submit']").attr('disabled', false);
+		} else {
+			$("#hint").text('账号输入有误');
+			$("input[name='submit']").attr('disabled', true);
+		}
+	}
+
+	function login() {
+		var user = $("input[name='user']").val();
+		var pass = $("input[name='pass']").val();
+		var code = $("input[name='code']").val();
+		
+		var useEmail = "";
+
+		var emailFormat = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+		
+		$.ajax({
+			type:"POST",
+			contentType:"application/json",
+			url:"api/is-code-img-right?code=" + code,
+			dataType:'json',
+			success : function(result) {
+				var res = eval("(" + result + ")");
+				if(res.data) {
+					if(emailFormat.test(user)) {
+						$.ajax({
+							type:"POST",
+							contentType:"application/json",
+							url:"api/login?email=" + user
+									+ "&pass=" + pass
+									+ "&useCookies=" + $("input[name='useCookies']").prop("checked"),
+							dataType:'json',
+							success : function(result) { 
+								loginResult(result.data);
+							}
+						});
+					} else {
+						$.ajax({
+							type:"POST",
+							contentType:"application/json",
+							url:"api/login?uid=" + user
+									+ "&pass=" + pass
+									+ "&useCookies=" + $("input[name='useCookies']").prop("checked"),
+							dataType:'json',
+							success : function(result) { 
+								loginResult(result);
+							}
+						});
+					}
+				} else {
+					alert("验证码错误!");
+					resetCode();
+				}
+			}
+		});
+	}
+	
+	function loginResult(result) {
+		var res = eval("(" + result + ")");
+		if(res.data) {
+			// success
+			$(location).prop("href","/" + fromUri);
+		} else {
+			alert("登录失败!" + res.msg);
+			resetCode();
+		}
+	}
+	
+	$(function(){
+		if($.getUrlVar("fromuri") != null) {
+			fromUri = $.getUrlVar("fromuri");
+		}
+		
+		if($.cookie("uid") != null){
+			$("input[name='user']").val($.cookie("uid"));
+			userOninput();
+		}
+		
+		if(fromUri != "") $("#register").attr("href", "register?fromuri=" + fromUri);
+		
+		var reg = new RegExp("-","g");
+		
+		fromUri = fromUri.replace(reg, "=");
+	});
+	
+</script>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>用户统一注册</title>
+	<link rel="stylesheet" type="text/css" href="../../css/default.css">
+	<style type="text/css">
+		#register {
+			text-align: center;
+			width: 460px;
+			margin: 0 auto;
+			position: relative;
+		}
+		#code-e-btn {
+			display: inline-block;
+			margin: auto;
+			width: 116px;
+			height: 55px;
+			vertical-align:bottom;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="register">
+		<form action="/api/login" method="post">
+			<div id="title">
+				<a>注册</a>
+			</div>
+			<input name="name" type="text" placeholder="用户名" oninput="nameOninput()">
+			<input name="email" type="text" placeholder="邮箱" oninput="emailOninput()">
+			<input name="pass" type="password" placeholder="密码" oninput="passesOninput()">
+			<input name="pass-re" type="password" placeholder="确认密码" oninput="passesOninput()">
+			<div class="code-div">
+				<input name="code" type="text" placeholder="验证码" id="code-input">
+				<img name="code-img" src="/api/code-img" id="code-img" onClick="resetCode()">
+			</div>
+			<div class="code-div">
+				<input name="code-e" type="text" placeholder="邮箱验证码" id="code-e-input">
+				<input class="btn" name="codeebtn" id="code-e-btn" type="button" value="发送" onClick="sendemail()">
+			</div>
+			<input class="btn" type="button" value="注册" id="submit" name="submit" onClick="register()" disabled="disabled">
+			<a id="login" href="/login">已有账号?去登录--&gt;</a><br>
+			<a id="hint">&nbsp;</a>
+		</form>
+	</div>
+	
+</body>
+<script type="text/javascript" src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/GetUrlVars.js"></script>
+<script type="text/javascript">
+	
+	var fromUri = "";
+
+	var nameOK = false;
+	var passOK = false;
+	var surepassOK = false;
+	var emailOK = false;
+	
+	var emailCD = 180;
+	
+	function resetCode() {
+		$("#code-img").attr("src", "/api/code-img?"+Math.random());
+	}
+	
+	function sendemail() {
+		var email = $("input[name='email']").val();
+		var code = $("input[name='code']").val();
+		var emailFormat = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+		
+		if(code != null && code != "") {
+				$.ajax({
+				type:"POST",
+				contentType:"application/json",
+				url:"api/is-code-img-right?code=" + code,
+				dataType:'json',
+				success : function(result) {
+					var res = eval("(" + result + ")");
+					if(res.data) {
+						if(emailFormat.test(email)) {
+							resetCode();
+							lockSendEmail();
+							$.ajax({
+								type:"POST",
+								contentType:"application/json",
+								url:"api/sendemail?email=" + email,
+								dataType:'json',
+								success : function(result) {
+									var res = eval("(" + result + ")");
+									alert(res.data);
+								}
+							});
+						} else {
+							alert("邮箱格式有误");
+							$("#hint").text('邮箱格式有误');
+						}
+					} else {
+						alert("验证码错误!")
+						resetCode();
+					}
+				}
+			});
+		} else {
+			alert("尚未填写验证码!");
+		}
+	}
+	
+	function lockSendEmail() {
+		console.log('lock');
+		$("input[name='codeebtn']").attr('disabled', true);
+		doEmailCD();
+	}
+	
+	function unlockSendEmail() {
+		console.log('unlock');
+		$("input[name='codeebtn']").attr('disabled', false);
+		$("input[name='codeebtn']").attr('value', '发送');
+		emailCD = 180;
+	}
+	
+	function doEmailCD() {
+		console.log('cd');
+		$("input[name='codeebtn']").attr('value', '重发(' + emailCD + 's)');
+		if(emailCD != 0) {
+			emailCD--;
+			setTimeout(doEmailCD, 1000);
+		} else {
+			unlockSendEmail()
+		}
+	}
+
+	function nameOninput() {
+		var name = $("input[name='name']").val();
+		if(name == "") {
+			$("#hint").text('昵称不能为空');
+			nameOK = false;
+		}
+		else {
+			$("#hint").text('');
+			nameOK = true;
+		}
+		$("input[name='submit']").attr('disabled', !(nameOK&&passOK&&surepassOK&&emailOK));
+	}
+	
+	function passesOninput() {
+		passOninput();
+		surepassOninput();
+		$("input[name='submit']").attr('disabled', !(nameOK&&passOK&&surepassOK&&emailOK));
+	}
+	
+	function passOninput() {
+		var pass = $("input[name='pass']").val();
+		var num = /^[0-9]*$/;
+		var eng = /^[A-Za-z]+$/;
+		if(pass.length < 8) {
+			$("#hint").text('密码长度至少8位，当前长度：'+pass.length);
+			passOK = false;
+		} else if(num.test(pass)) {
+			$("#hint").text('密码应至少包含两种字符，当前缺少英文');
+			passOK = false;
+		} else if(eng.test(pass)){
+			$("#hint").text('密码应至少包含两种字符，当前缺少数字');
+			passOK = false;
+		} else {
+			$("#hint").text('');
+			passOK = true;
+		}
+	}
+	
+	function surepassOninput() {
+		var pass = $("input[name='pass']").val();
+		var surepass = $("input[name='pass-re']").val();
+		if(pass == surepass) {
+			if(passOK) {
+				$("#hint").text('');
+			}
+			surepassOK = true;
+		}
+		else {
+			$("#hint").text('确认密码与密码不一致');
+			surepassOK = false;
+		}
+	}
+	
+	function emailOninput() {
+		var email = $("input[name='email']").val();
+		var emailFormat = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+		if(emailFormat.test(email)) {
+			$("#hint").text('');
+			$("input[name='send']").attr('disabled', false);
+			emailOK = true;
+		}
+		else {
+			$("#hint").text('邮箱格式有误');
+			$("input[name='send']").attr('disabled', true);
+			emailOK = false;
+		}
+		$("input[name='submit']").attr('disabled', !(nameOK&&passOK&&surepassOK&&emailOK));
+	}
+	
+	function register() {
+		var name = $("input[name='name']").val();
+		var pass = $("input[name='pass']").val();
+		var surepass = $("input[name='pass-re']").val();
+		var email = $("input[name='email']").val();
+		var code = $("input[name='code-e']").val();
+		
+		if(code != null && code != "") {
+			$.ajax({
+				type:"POST",
+				contentType:"application/json",
+				url:"api/register?name=" + encodeURI(name, "gbk")
+						+ "&pass=" + pass
+						+ "&surepass=" + surepass
+						+ "&email=" + email
+						+ "&code=" + code,
+				dataType:'json',
+				success : function(result) {
+					var res = eval("(" + result + ")");
+					if(res.data) {
+						alert(res.msg + ", 您的uid是" + res.uid+ ", 您可以使用uid或邮箱作为本站唯一登录凭证");
+						if(fromUri == "") $(location).prop("href", "/login");
+						else $(location).prop("href", "/login?fromuri=" + fromUri);
+						
+					} else {
+						alert(res.msg);
+					}
+		    	}
+			});
+		} else {
+			alert("尚未填写邮箱验证码!");
+		}
+	}
+	
+	$(function(){
+		if($.getUrlVar("fromuri") != null) {
+			fromUri = $.getUrlVar("fromuri");
+		}
+		
+		if(fromUri != "") $("#login").attr("href", "login?fromuri=" + fromUri);
+		
+		var reg = new RegExp("-","g");
+		
+		fromUri = fromUri.replace(reg, "=");
+	});
+	
+</script>
+</html>

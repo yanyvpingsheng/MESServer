@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>作业车间调度系统</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">切换导航</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">MES</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="/">产品介绍</a>
+                        </li>
+                        <li class="active">
+                            <a href="#">作业车间调度系统</a>
+                        </li>
+                        <li>
+                            <a href="workstation">车间模型管理</a>
+                        </li>
+                        <li>
+                            <a href="machine">机器管理</a>
+                        </li>
+                        <li>
+                            <a href="workpiece">工件管理</a>
+                        </li>
+                        <li>
+                            <a href="process">工序管理</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="login">登录</a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">开发人员<strong class="caret"></strong></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#">刘涛</a>
+                                </li>
+                                <li>
+                                    <a href="#">刘昊</a>
+                                </li>
+                                <li>
+                                    <a href="#">李沐辰</a>
+                                </li>
+                                <li>
+                                    <a href="#">赖弘</a>
+                                </li>
+                                <li>
+                                    <a href="#">夏晖阳</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+            </nav>
+            <h3>
+                作业车间调度系统
+            </h3>
+            <h2 id="title">
+                最优解为
+            </h2>
+            <ul id="dnaList">
+            </ul>
+            <div class="row clearfix">
+                <div class="col-md-6 column">
+                    <h3>
+                        作业计划
+                    </h3>
+                    <canvas id="work" width="480" height="300"
+                            style="border:1px solid #000000;">
+
+                    </canvas>
+                </div>
+                <div class="col-md-6 column">
+                    <h3>
+                        机器计划
+                    </h3>
+                    <canvas id="machine" width="480" height="300"
+                            style="border:1px solid #000000;">
+
+                    </canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="../../js/GetUrlVars.js"></script>
+<script type="text/javascript" src="../../js/BootstrapUtil.js"></script>
+<script type="text/javascript" src="../../js/GanttDraw.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    function drawItem(dna) {
+        var id = $.getUrlVar("id");
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "api/draw?id=" + id + "&width=" + 480 + "&height=" + 300 + "&dna=" + dna,
+            dataType: 'json',
+            success: function (result) {
+                var res = eval("(" + result + ")");
+                commonUtil.message(res.data);
+                drawGannt($("#work"), res.work);
+                drawGannt($("#machine"), res.machine);
+            }
+        });
+    }
+    $(function () {
+        var id = $.getUrlVar("id");
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "api/run?id=" + id + "&width=" + 480 + "&height=" + 300,
+            dataType: 'json',
+            success: function (result) {
+                var res = eval("(" + result + ")");
+                commonUtil.message(res.data);
+                $("#title").text("最优解为" + res.time);
+                drawGannt($("#work"), res.work);
+                drawGannt($("#machine"), res.machine);
+                var plugin = "\n" +
+                    "                <li>\n" +
+                    "                    dna替换标记\n" +
+                    "                    <a href=\"javascript:void(0)\" onclick=\"drawItem('dna替换标记')\" role=\"button\" class=\"btn\"\n" +
+                    "                       data-toggle=\"modal\">查看</a>\n" +
+                    "                </li>";
+                for (var dna of res.dna) {
+                    var pluginadd = plugin.replace("dna替换标记", dna);
+                    var pluginadd = pluginadd.replace("dna替换标记", dna);
+                    $("#dnaList").append(pluginadd);
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
