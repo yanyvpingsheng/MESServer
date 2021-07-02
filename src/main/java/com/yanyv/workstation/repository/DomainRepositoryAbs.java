@@ -1,8 +1,6 @@
 package com.yanyv.workstation.repository;
 
-import com.yanyv.workstation.entity.Person;
 import com.yanyv.workstation.entity.User;
-import com.yanyv.workstation.entity.Workpiece;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

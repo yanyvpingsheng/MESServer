@@ -7,7 +7,9 @@ import org.hibernate.mapping.Set;
 import javax.persistence.*;
 import java.util.List;
 
-// 机器类
+/**
+ * 机器实体类
+ */
 @Data
 @Entity
 @Table(name="wmachine")

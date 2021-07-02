@@ -7,6 +7,9 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 工作中心
+ */
 @Data
 @Entity
 @Table(name="wworkstation")

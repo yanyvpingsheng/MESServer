@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * 网络接口
+ * 网络接口控制器
  */
 @Controller
 @RequestMapping("api")
@@ -55,6 +55,7 @@ public class ApiController {
     @Autowired
     WorkstationService workstationService;
 
+    // 返回结果json数据
     JSONObject result = new JSONObject();
 
     /**
@@ -149,6 +150,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 随机生成验证码
+     */
     private int getPin() {
         int pin = (int) (Math.random() * 9000 + 1000);
         return pin;
@@ -258,6 +262,9 @@ public class ApiController {
     }
 
 
+    /**
+     * 保存或更新工件API
+     */
     @RequestMapping("workpieceSaveOrUpdate")
     @ResponseBody
     public String apiWorkpieceSaveOrUpdate(User user, Workpiece workpiece) {
@@ -271,6 +278,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 删除工件API
+     */
     @RequestMapping("workpieceDelete")
     @ResponseBody
     public String apiWorkpieceDelete(Workpiece workpiece) {
@@ -280,6 +290,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 获取工件API 传入起始位置和查询长度
+     */
     @RequestMapping("workpiece/get")
     @ResponseBody
     @JsonFormat
@@ -287,12 +300,18 @@ public class ApiController {
         return WorkpieceVo.format(workpieceService.queryAllLimit(from, length, creater));
     }
 
+    /**
+     * 获取车间模型中的工件列表API
+     */
     @RequestMapping("workpiece/getInWorkstation")
     @ResponseBody
     public List<WorkpieceVo> getWorkpiecesInWorkstation(WorkStation workStation) {
         return WorkpieceVo.format(workpieceService.queryInWorkstation(workStation));
     }
 
+    /**
+     * 获取工件数量API
+     */
     @RequestMapping("workpiece/getNum")
     @ResponseBody
     public String getNumWorkpiece(User creater) {
@@ -302,6 +321,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 保存或更新工序API
+     */
     @RequestMapping("processSaveOrUpdate")
     @ResponseBody
     public String apiProcessSaveOrUpdate(User user, Process process, Long workpieceId, Long machineId) {
@@ -317,6 +339,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 删除工序API
+     */
     @RequestMapping("processDelete")
     @ResponseBody
     public String apiProcessDelete(Process process) {
@@ -326,6 +351,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 获取工序API
+     */
     @RequestMapping("process/get")
     @ResponseBody
     @JsonFormat
@@ -333,6 +361,9 @@ public class ApiController {
         return ProcessVo.format(processService.queryAllLimit(from, length, creater, workpiece));
     }
 
+    /**
+     * 获取工序数量API
+     */
     @RequestMapping("process/getNum")
     @ResponseBody
     public String getNumProcess(User creater, Long workpiece) {
@@ -343,6 +374,9 @@ public class ApiController {
     }
 
 
+    /**
+     * 保存或更新机器API
+     */
     @RequestMapping("machineSaveOrUpdate")
     @ResponseBody
     public String apiMachineSaveOrUpdate(User user, Machine machine) {
@@ -356,6 +390,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 删除机器API
+     */
     @RequestMapping("machineDelete")
     @ResponseBody
     public String apiMachineDelete(Machine machine) {
@@ -365,6 +402,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 获取机器API
+     */
     @RequestMapping("machine/get")
     @ResponseBody
     @JsonFormat
@@ -372,6 +412,9 @@ public class ApiController {
         return MachineVo.format(machineService.queryAllLimit(from, length, creater));
     }
 
+    /**
+     * 获取机器数量API
+     */
     @RequestMapping("machine/getNum")
     @ResponseBody
     public String getNumMachine(User creater) {
@@ -381,6 +424,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 保存或更新车间模型API
+     */
     @RequestMapping("workstationSaveOrUpdate")
     @ResponseBody
     public String apiWorkstationSaveOrUpdate(User user, WorkStation workStation) {
@@ -394,6 +440,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 删除车间模型API
+     */
     @RequestMapping("workstationDelete")
     @ResponseBody
     public String apiWorkstationDelete(WorkStation workStation) {
@@ -403,6 +452,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 获取车间模型API
+     */
     @RequestMapping("workstation/get")
     @ResponseBody
     @JsonFormat
@@ -410,6 +462,9 @@ public class ApiController {
         return WorkstationVo.format(workstationService.queryAllLimit(from, length, creater));
     }
 
+    /**
+     * 获取车间模型数量API
+     */
     @RequestMapping("workstation/getNum")
     @ResponseBody
     public String getNumWorkstation(User creater) {
@@ -419,6 +474,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 向车间模型添加工件API
+     */
     @RequestMapping("workstation/add")
     @ResponseBody
     public String workstationAdd(WorkStation workStation, Long workpieceId) {
@@ -430,6 +488,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 从车间模型删除工件API
+     */
     @RequestMapping("workstationDeleteWorkpiece")
     @ResponseBody
     public String workstationDeleteWorkpiece(WorkStation workStation, Long itemId) {
@@ -445,6 +506,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 车间模型数据导出API
+     */
     @RequestMapping("workstationExport")
     @ResponseBody
     public String workstationExport(WorkStation workStation) {
@@ -456,6 +520,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 运行车间调度并返回结果数据API
+     */
     @RequestMapping("run")
     @ResponseBody
     public String run(WorkStation workStation, Canvas canvas) {
@@ -483,6 +550,9 @@ public class ApiController {
         return result.toString();
     }
 
+    /**
+     * 根据dna画甘特图API
+     */
     @RequestMapping("draw")
     @ResponseBody
     public String draw(WorkStation workStation, Canvas canvas, String dna) {

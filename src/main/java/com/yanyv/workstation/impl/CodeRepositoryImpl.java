@@ -1,13 +1,9 @@
 package com.yanyv.workstation.impl;
 
 import com.yanyv.workstation.entity.Code;
-import com.yanyv.workstation.entity.Person;
-import com.yanyv.workstation.entity.User;
 import com.yanyv.workstation.repository.CodeRepository;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
